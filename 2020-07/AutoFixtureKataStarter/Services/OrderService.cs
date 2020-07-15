@@ -1,5 +1,6 @@
 ﻿using AutoFixtureKataStarter.Exceptions;
 using AutoFixtureKataStarter.Model;
+using System;
 
 namespace AutoFixtureKataStarter.Services
 {
@@ -20,6 +21,9 @@ namespace AutoFixtureKataStarter.Services
         {
             ValidateOrder(order);
 
+            SaveOrder(order);
+            _logger.Log($"Order {order.Id} validated and saved.");
+
             ExpediteOrder(order);
 
             AddOrderToCustomerHistory(order);
@@ -34,6 +38,11 @@ namespace AutoFixtureKataStarter.Services
             if (order.Customer == null) throw new InvalidOrderException("Order requires a customer.");
 
             ValidateCustomer(order.Customer);
+        }
+
+        private void SaveOrder(Order order)
+        {
+            order.Id = new Random().Next(1000, 10000);
         }
 
         private void ValidateCustomer(Customer customer)
@@ -65,17 +74,20 @@ namespace AutoFixtureKataStarter.Services
 
         private void ExpediteOrder(Order order)
         {
-            if (order.TotalAmount > 5000m && order.Customer.CreditRating > 500)
+            if(BigCustomer(order.Customer) ||
+                BigOrder(order))
             {
                 order.IsExpedited = true;
+                _logger.Log($"Order {order.Id} expedited.");
             }
         }
+
+        private bool BigCustomer(Customer c) => c.TotalPurchases > 10000;
+        private bool BigOrder(Order o) => o.TotalAmount > 5000m && o.Customer.CreditRating > 500;
 
         private void AddOrderToCustomerHistory(Order order)
         {
             order.Customer.OrderHistory.Add(order);
-
-            order.Customer.TotalPurchases += order.TotalAmount;
         }
     }
 }

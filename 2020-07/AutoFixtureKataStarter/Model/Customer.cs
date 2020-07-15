@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace AutoFixtureKataStarter.Model
 {
@@ -14,7 +15,7 @@ namespace AutoFixtureKataStarter.Model
         public string LastName { get; set; }
         public Address HomeAddress { get; set; }
         public int CreditRating { get; set; }
-        public decimal TotalPurchases { get; set; }
+        public decimal TotalPurchases => OrderHistory.Sum(o => o.TotalAmount);
 
         public List<Order> OrderHistory { get; set; } = new List<Order>();
     }
