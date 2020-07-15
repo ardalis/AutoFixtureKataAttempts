@@ -31,6 +31,7 @@ namespace AutoFixtureKataStarter
             var order = _fixture.Build<Order>()
                 .With(o => o.Id, 0)
                 .With(o => o.Customer, _fixture.Build<Customer>()
+                                        .With(c => c.CreditRating, 300)
                                         .Without(c => c.OrderHistory).Create) // AutoFixture doesn't support loops in object hierarchies
                 .Create();
 
@@ -48,6 +49,7 @@ namespace AutoFixtureKataStarter
             // This is one of the key values of AutoFixture. Try to use this style in your tests for this exercise.
 
             order.Id = 0; // reset this to 0 so our test passes; otherwise it will have a random int value
+            order.Customer.CreditRating = 300;
 
             // Act
             sut.PlaceOrder(order); // sut = 'system under test'

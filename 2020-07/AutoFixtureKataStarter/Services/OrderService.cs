@@ -3,8 +3,9 @@ using AutoFixtureKataStarter.Model;
 
 namespace AutoFixtureKataStarter.Services
 {
-    // TODO: Replace this with your completed OrderService from the Test Builders Kata
-    // TODO: https://github.com/ardalis/BuilderTestSample
+    /// <summary>
+    /// Borrowing from Brendan: https://github.com/DevChatter/BuilderTestSample/blob/master/src/BuilderTestSample/Services/OrderService.cs
+    /// </summary>
     public class OrderService
     {
         private readonly IFileLogger _logger;
@@ -26,52 +27,55 @@ namespace AutoFixtureKataStarter.Services
 
         private void ValidateOrder(Order order)
         {
-            // throw InvalidOrderException unless otherwise noted.
-
             if (order.Id != 0) throw new InvalidOrderException("Order ID must be 0.");
 
-            // TODO: order amount must be greater than zero
-            // TODO: order must have a customer (customer is not null)
+            if (order.TotalAmount <= 0) throw new InvalidOrderException("Amount must be greater than 0.");
+
+            if (order.Customer == null) throw new InvalidOrderException("Order requires a customer.");
 
             ValidateCustomer(order.Customer);
         }
 
         private void ValidateCustomer(Customer customer)
         {
-            // throw InvalidCustomerException unless otherwise noted
-            // create a CustomerBuilder to implement the tests for these scenarios
-
-            // TODO: customer must have an ID > 0
-            // TODO: customer must have an address (it is not null)
-            // TODO: customer must have a first and last name
-            // TODO: customer must have credit rating > 200 (otherwise throw InsufficientCreditException)
-            // TODO: customer must have total purchases >= 0
+            if (customer.Id <= 0) throw new InvalidCustomerException("Customer must have an ID greater than 0.");
+            if (customer.HomeAddress == null) throw new InvalidCustomerException("Customer must have an address.");
+            if (string.IsNullOrEmpty(customer.FirstName)
+                || string.IsNullOrEmpty(customer.LastName)) throw new InvalidCustomerException("Customer must have first and last name.");
+            if (customer.CreditRating <= 200)
+                throw new InsufficientCreditException("Customer must have credit above 200.");
+            if (customer.TotalPurchases < 0) throw new InvalidCustomerException("Customers cannot have negative purchase total.");
 
             ValidateAddress(customer.HomeAddress);
         }
 
         private void ValidateAddress(Address homeAddress)
         {
-            // throw InvalidAddressException unless otherwise noted
-            // create an AddressBuilder to implement the tests for these scenarios
-
-            // TODO: street1 is required (not null or empty)
-            // TODO: city is required (not null or empty)
-            // TODO: state is required (not null or empty)
-            // TODO: postalcode is required (not null or empty)
-            // TODO: country is required (not null or empty)
+            if (string.IsNullOrEmpty(homeAddress.Street1))
+                throw new InvalidAddressException("Street 1 is required.");
+            if (string.IsNullOrEmpty(homeAddress.City))
+                throw new InvalidAddressException("City is required.");
+            if (string.IsNullOrEmpty(homeAddress.State))
+                throw new InvalidAddressException("State is required.");
+            if (string.IsNullOrEmpty(homeAddress.PostalCode))
+                throw new InvalidAddressException("Postal code is required.");
+            if (string.IsNullOrEmpty(homeAddress.Country))
+                throw new InvalidAddressException("Country is required.");
         }
 
         private void ExpediteOrder(Order order)
         {
-            // TODO: if customer's total purchases > 5000 and credit rating > 500 set IsExpedited to true
+            if (order.TotalAmount > 5000m && order.Customer.CreditRating > 500)
+            {
+                order.IsExpedited = true;
+            }
         }
 
         private void AddOrderToCustomerHistory(Order order)
         {
-            // TODO: add the order to the customer
+            order.Customer.OrderHistory.Add(order);
 
-            // TODO: update the customer's total purchases property
+            order.Customer.TotalPurchases += order.TotalAmount;
         }
     }
 }
