@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 namespace AutoFixtureKataStarter
 {
@@ -7,12 +8,84 @@ namespace AutoFixtureKataStarter
         void Log(string message);
     }
 
+    public interface ISystemClock
+    {
+        DateTime Today { get; }
+    }
+
+    public class SystemClock : ISystemClock
+    {
+        public DateTime Today => DateTime.Today;
+    }
+
+    public interface IFileSystem
+    {
+        DateTime GetLastAccessTime(string filepath);
+    }
+
+    public class RealFileSystem : IFileSystem
+    {
+        public DateTime GetLastAccessTime(string filepath)
+        {
+            return File.GetLastAccessTime(filepath);
+        }
+    }
+
     public class FileLogger : IFileLogger
     {
+        private readonly IFileSystem _fileSystem;
+        private readonly ISystemClock _systemClock;
+
+        public DateTime TheDate { get; set; }
+
+        public FileLogger() : this(DateTime.Today)
+        {
+        }
+
+        public FileLogger(DateTime theDate) : this(theDate, new RealFileSystem())
+        {
+        }
+        public FileLogger(DateTime theDate,
+    IFileSystem fileSystem) : this(theDate, fileSystem, new SystemClock())
+        {
+        }
+
+
+        public FileLogger(DateTime theDate,
+            IFileSystem fileSystem,
+            ISystemClock systemClock)
+        {
+            TheDate = theDate;
+            _fileSystem = fileSystem;
+            _systemClock = systemClock;
+        }
+
         public void Log(string message)
         {
-            // TODO: Use your FileLogger from the exercise here
-            // TODO: https://github.com/ardalis/kata-catalog/blob/master/katas/File%20Logger.md
+            string filename = "";
+            if (TheDate.DayOfWeek == DayOfWeek.Saturday ||
+                TheDate.DayOfWeek == DayOfWeek.Sunday)
+            {
+                filename = "weekend.txt";
+                var accessTime = _fileSystem.GetLastAccessTime(filename);
+                if (accessTime < _systemClock.Today.AddDays(-5))
+                {
+                    // Saturday of access time
+                    if (accessTime.DayOfWeek == DayOfWeek.Sunday)
+                    {
+                        accessTime = accessTime.AddDays(-1);
+                    }
+                    if (File.Exists("weekend.txt"))
+                    {
+                        File.Move(filename, $"weekend-{accessTime.ToString("yyyyMMdd")}.txt");
+                    }
+                }
+            }
+            else
+            {
+                filename = $"{TheDate.ToString("yyyyMMdd")}.txt";
+            }
+            File.AppendAllText(filename, message + Environment.NewLine);
         }
     }
 }

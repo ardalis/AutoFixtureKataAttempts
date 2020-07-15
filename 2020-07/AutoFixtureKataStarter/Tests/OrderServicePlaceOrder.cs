@@ -1,14 +1,12 @@
 using AutoFixture;
 using AutoFixture.AutoMoq;
-using AutoFixtureKataStarter;
 using AutoFixtureKataStarter.Exceptions;
 using AutoFixtureKataStarter.Model;
 using AutoFixtureKataStarter.Services;
-using Castle.Core.Logging;
 using Moq;
 using Xunit;
 
-namespace BuilderTestSample.Tests
+namespace AutoFixtureKataStarter.Tests
 {
     public class OrderServicePlaceOrder
     {
